@@ -101,24 +101,43 @@ export function LineChart({ series, labels, width = 640, height = 230, pre = "",
 // #endregion
 
 // #region BarChart
+const topRound = (x: number, y: number, w: number, base: number, r: number) =>
+  `M${x},${base} V${y + r} Q${x},${y} ${x + r},${y} H${x + w - r} Q${x + w},${y} ${x + w},${y + r} V${base} Z`;
+/** Bars with rounded tops. Stacked columns are one rounded shape; segments sit inside with a 2px gap. */
 export function BarChart({ data, series, labels, highlight, stacked, width = 640, height = 230, pre = "" }: {
   data?: number[]; series?: { data: number[]; color: Series }[]; labels?: string[]; highlight?: number; stacked?: boolean; width?: number; height?: number; pre?: string;
 }) {
+  const id = useId().replace(/:/g, "");
   const S = series ?? [{ data: data ?? [], color: "c7" as Series }];
-  const w = width, h = height, pl = 36, pr = 6, pt = 14, pb = labels ? 26 : 8, n = S[0].data.length;
+  const w = width, h = height, pl = 36, pr = 6, pt = 14, pb = labels ? 26 : 8, n = S[0].data.length, base = h - pb;
   const sums = S[0].data.map((_, i) => (stacked ? S.reduce((a, s) => a + s.data[i], 0) : Math.max(...S.map((s) => s.data[i]))));
-  const max = nice(Math.max(...sums) * 1.05), Y = (v: number) => ((h - pt - pb) * v) / max, slot = (w - pl - pr) / n, gap = slot * 0.4;
+  const max = nice(Math.max(...sums) * 1.05), Y = (v: number) => ((h - pt - pb) * v) / max, slot = (w - pl - pr) / n, gap = slot * (stacked ? 0.5 : 0.42);
   const bw = stacked ? slot - gap : (slot - gap) / S.length;
   return (
     <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Bar chart" {...stylex.props(ax.svg)}>
       <Axes w={w} h={h} pl={pl} pr={pr} pt={pt} pb={pb} max={max} pre={pre} />
       {S[0].data.map((_, i) => {
-        let acc = 0;
-        return <g key={i}>{S.map((s, j) => {
-          const v = s.data[i], bh = Math.max(2, Y(v)), x = pl + slot * i + gap / 2 + (stacked ? 0 : bw * j), y = h - pb - bh - (stacked ? Y(acc) : 0); acc += v;
-          const c = highlight !== undefined && S.length === 1 ? (i === highlight ? color.accent : color.c7) : palette[s.color];
-          return <rect key={j} x={x} y={y} width={bw} height={bh} rx={stacked && j < S.length - 1 ? 0 : Math.min(5, bw / 2)} style={{ fill: c }} />;
-        })}{highlight === i && S.length === 1 && <text x={pl + slot * i + slot / 2} y={h - pb - Y(S[0].data[i]) - 8} textAnchor="middle" style={{ fill: color.fg, fontWeight: 600 }}>{pre + k(S[0].data[i])}</text>}</g>;
+        const x0 = pl + slot * i + gap / 2;
+        if (stacked) {
+          const th = Math.max(4, Y(sums[i])); let acc = 0;
+          return (
+            <g key={i}>
+              <clipPath id={`${id}c${i}`}><path d={topRound(x0, base - th, bw, base, Math.min(6, bw / 2))} /></clipPath>
+              <g clipPath={`url(#${id}c${i})`}>
+                {S.map((s, j) => { const sh = Y(s.data[i]), last = j === S.length - 1; const y = base - acc - sh + (last ? 0 : 1); acc += sh;
+                  return <rect key={j} x={x0} y={y} width={bw} height={Math.max(1, sh - (last ? 1 : 2))} style={{ fill: palette[s.color] }} />; })}
+              </g>
+            </g>
+          );
+        }
+        return (
+          <g key={i}>
+            {S.map((s, j) => { const bh = Math.max(2, Y(s.data[i])), inset = S.length > 1 ? 1.5 : 0;
+              const c = highlight !== undefined && S.length === 1 ? (i === highlight ? color.accent : color.c7) : palette[s.color];
+              return <path key={j} d={topRound(x0 + bw * j, base - bh, bw - inset, base, Math.min(6, bw / 2))} style={{ fill: c }} />; })}
+            {highlight === i && S.length === 1 && <text x={pl + slot * i + slot / 2} y={base - Y(S[0].data[i]) - 9} textAnchor="middle" style={{ fill: color.fg, fontWeight: 600 }}>{pre + k(S[0].data[i])}</text>}
+          </g>
+        );
       })}
       {labels?.map((l, i) => <text key={i} x={pl + slot * i + slot / 2} y={h - 6} textAnchor="middle" {...stylex.props(ax.label)}>{l}</text>)}
     </svg>
@@ -158,18 +177,36 @@ export function Sparkline({ data, color: c = "c1", width = 120, height = 34, are
 
 // #region BarList
 const bl = stylex.create({
-  list: { display: "flex", flexDirection: "column", gap: 6, width: "100%" },
-  row: { display: "flex", alignItems: "center", gap: 10, fontSize: 13 },
-  trk: { position: "relative", flexGrow: 1, minWidth: 0, height: 30 },
-  fill: { position: "absolute", top: 0, bottom: 0, left: 0, borderRadius: radius.md, backgroundColor: color.sunken, boxShadow: `inset 0 0 0 1px ${color.line}` },
-  lead: { backgroundColor: color.accentSoft, boxShadow: `inset 2px 0 0 ${color.accent}` },
+  list: { display: "flex", flexDirection: "column", gap: 14, width: "100%" },
+  row: { display: "flex", flexDirection: "column", gap: 7, minWidth: 0 },
+  top: { display: "flex", alignItems: "center", gap: 10, fontSize: 13.5, minWidth: 0 },
+  rank: { fontFamily: font.mono, fontSize: 11, color: color.fg4 },
+  name: { flexGrow: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 8, color: color.fg, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
+  share: { fontSize: 12, color: color.fg3, fontVariantNumeric: "tabular-nums" },
+  val: { minWidth: 64, textAlign: "right", fontWeight: 600, fontVariantNumeric: "tabular-nums", color: color.fg },
+  track: { height: 6, borderRadius: radius.pill, backgroundColor: color.sunken, boxShadow: `inset 0 0 0 1px ${color.line}`, overflow: "hidden" },
+  fill: { display: "block", height: "100%", borderRadius: radius.pill, backgroundColor: color.fg4 },
+  lead: { backgroundColor: color.accent },
   w: (p: number) => ({ width: `${p}%` }),
-  nm: { position: "absolute", left: 10, top: 0, bottom: 0, display: "flex", alignItems: "center", gap: 8, color: color.fg2, whiteSpace: "nowrap" },
-  v: { minWidth: 56, textAlign: "right", fontVariantNumeric: "tabular-nums", fontWeight: 500, color: color.fg },
 });
+/** Ranked rows: rank, name, share and value on one line, a slim track underneath. The leader takes the accent. */
 export function BarList({ rows, pre = "" }: { rows: { label: ReactNode; value: number; icon?: IconName }[]; pre?: string }) {
-  const mx = Math.max(...rows.map((r) => r.value));
-  return <div {...stylex.props(bl.list)}>{rows.map((r, i) => <div key={i} {...stylex.props(bl.row)}><div {...stylex.props(bl.trk)}><span {...stylex.props(bl.fill, i === 0 && bl.lead, bl.w(Math.max(6, (r.value / mx) * 100)))} /><span {...stylex.props(bl.nm)}>{r.icon && <Icon name={r.icon} size={14} />}{r.label}</span></div><span {...stylex.props(bl.v)}>{pre}{r.value.toLocaleString()}</span></div>)}</div>;
+  const mx = Math.max(...rows.map((r) => r.value)), total = rows.reduce((a, r) => a + r.value, 0);
+  return (
+    <div {...stylex.props(bl.list)}>
+      {rows.map((r, i) => (
+        <div key={i} {...stylex.props(bl.row)}>
+          <div {...stylex.props(bl.top)}>
+            <span {...stylex.props(bl.rank)}>{String(i + 1).padStart(2, "0")}</span>
+            <span {...stylex.props(bl.name)}>{r.icon && <Icon name={r.icon} size={14} />}{r.label}</span>
+            <span {...stylex.props(bl.share)}>{Math.round((r.value / total) * 100)}%</span>
+            <span {...stylex.props(bl.val)}>{pre}{r.value.toLocaleString()}</span>
+          </div>
+          <div {...stylex.props(bl.track)}><span {...stylex.props(bl.fill, i === 0 && bl.lead, bl.w(Math.max(2, (r.value / mx) * 100)))} /></div>
+        </div>
+      ))}
+    </div>
+  );
 }
 // #endregion
 

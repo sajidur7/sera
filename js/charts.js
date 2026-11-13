@@ -44,24 +44,27 @@ ch.line=(o={})=>{
   return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="${o.aria||'Line chart'}"><defs>${defs}</defs>${axes(o,w,h,pl,pr,pt,pb,max,min)}${body}${lab}</svg>`;
 };
 ch.bar=(o={})=>{
-  const w=o.w||640,h=o.h||230,pl=o.pl??36,pr=6,pt=12,pb=o.labels?26:8;
+  const w=o.w||640,h=o.h||230,pl=o.pl??36,pr=6,pt=14,pb=o.labels?26:8, id='b'+(++uid);
   const S=o.series||[{d:o.d,c:o.c||'c7'}], n=S[0].d.length, stacked=o.stacked;
   const sums=S[0].d.map((_,i)=>stacked?S.reduce((a,s)=>a+s.d[i],0):Math.max(...S.map(s=>s.d[i])));
   const max=o.max||niceMax(Math.max(...sums)*1.05), Y=v=>(h-pt-pb)*v/max;
-  const slot=(w-pl-pr)/n, gw=slot*(o.gap??.42), bw=stacked?slot-gw:(slot-gw)/S.length;
-  let body='';
-  for(let i=0;i<n;i++){ let acc=0;
-    S.forEach((s,j)=>{ const v=s.d[i], bh=Math.max(2,Y(v)); const x=pl+slot*i+gw/2+(stacked?0:bw*j); const y=h-pb-bh-(stacked?Y(acc):0);
-      const c=o.hi!=null&&!stacked&&S.length===1?(i===o.hi?'accent':'c7'):s.c;
-      const r=stacked?(j===S.length-1?Math.min(6,bw/2):0):Math.min(o.r??6,bw/2);
-      body+= stacked&&j<S.length-1?`<rect x="${f(x)}" y="${f(y)}" width="${f(bw)}" height="${f(bh)}" style="fill:var(--${s.c})"/>`
-        :`<rect x="${f(x)}" y="${f(y)}" width="${f(bw)}" height="${f(bh+(stacked&&j>0?0:0))}" rx="${f(r)}" style="fill:var(--${c})"/>`;
-      if(stacked&&j===0) body+=`<rect x="${f(x)}" y="${f(h-pb-Math.min(bh,8))}" width="${f(bw)}" height="${f(Math.min(bh,8))}" style="fill:var(--${s.c})"/>`;
-      acc+=v; });
-    if(o.hi===i&&S.length===1){ const x=pl+slot*i+slot/2, y=h-pb-Y(S[0].d[i])-10; body+=`<text x="${f(x)}" y="${f(y)}" text-anchor="middle" style="fill:var(--fg);font-weight:600">${(o.pre||'')+k(S[0].d[i])}</text>`; }
+  const slot=(w-pl-pr)/n, gw=slot*(o.gap??(stacked?.5:.42)), bw=stacked?slot-gw:(slot-gw)/S.length;
+  let body='', defs='';
+  for(let i=0;i<n;i++){
+    if(stacked){
+      // one rounded column, clipped; segments stack inside it with a 2px gap
+      const x=pl+slot*i+gw/2, th=Math.max(4,Y(sums[i])), top=h-pb-th, r=Math.min(6,bw/2);
+      defs+=`<clipPath id="${id}c${i}"><path d="M${f(x)},${f(h-pb)} V${f(top+r)} Q${f(x)},${f(top)} ${f(x+r)},${f(top)} H${f(x+bw-r)} Q${f(x+bw)},${f(top)} ${f(x+bw)},${f(top+r)} V${f(h-pb)} Z"/></clipPath>`;
+      let acc=0, g='';
+      S.forEach((s,j)=>{ const sh=Y(s.d[i]); g+=`<rect x="${f(x)}" y="${f(h-pb-acc-sh+(j<S.length-1?1:0))}" width="${f(bw)}" height="${f(Math.max(1,sh-(j<S.length-1?2:1)))}" style="fill:var(--${s.c})"/>`; acc+=sh; });
+      body+=`<g clip-path="url(#${id}c${i})">${g}</g>`;
+    } else S.forEach((s,j)=>{ const v=s.d[i], bh=Math.max(2,Y(v)), x=pl+slot*i+gw/2+bw*j, r=Math.min(o.r??6,bw/2);
+      const c=o.hi!=null&&S.length===1?(i===o.hi?'accent':'c7'):s.c;
+      body+=`<path d="M${f(x)},${f(h-pb)} V${f(h-pb-bh+r)} Q${f(x)},${f(h-pb-bh)} ${f(x+r)},${f(h-pb-bh)} H${f(x+bw-r-(S.length>1?1.5:0))} Q${f(x+bw-(S.length>1?1.5:0))},${f(h-pb-bh)} ${f(x+bw-(S.length>1?1.5:0))},${f(h-pb-bh+r)} V${f(h-pb)} Z" style="fill:var(--${c})"/>`; });
+    if(o.hi===i&&S.length===1){ const x=pl+slot*i+slot/2, y=h-pb-Y(S[0].d[i])-9; body+=`<text x="${f(x)}" y="${f(y)}" text-anchor="middle" style="fill:var(--fg);font-weight:600">${(o.pre||'')+k(S[0].d[i])}</text>`; }
   }
   let lab=''; if(o.labels){ const every=Math.ceil(n/(o.maxLabels||12)); o.labels.forEach((l,i)=>{ if(i%every===0) lab+=`<text x="${f(pl+slot*i+slot/2)}" y="${h-6}" text-anchor="middle">${l}</text>`; }); }
-  return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="${o.aria||'Bar chart'}">${axes(o,w,h,pl,pr,pt,pb,max,0)}${body}${lab}</svg>`;
+  return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="${o.aria||'Bar chart'}"><defs>${defs}</defs>${axes(o,w,h,pl,pr,pt,pb,max,0)}${body}${lab}</svg>`;
 };
 ch.donut=(o={})=>{
   const s=o.size||180, th=o.th||18, r=(s-th)/2-2, c=2*Math.PI*r, tot=o.data.reduce((a,d)=>a+d.v,0); const gap=(th*(o.round===false?.25:1)+4)/c*100;
@@ -151,7 +154,7 @@ ch.radar=(o={})=>{
   return `<svg class="chart" viewBox="0 0 ${s} ${s}" style="width:${s}px;max-width:100%" role="img" aria-label="Radar chart">${g}</svg>`;
 };
 /* html charts */
-ch.barlist=(rows,pre='')=>{ const mx=Math.max(...rows.map(r=>r[1])); return `<div class="barlist">${rows.map(r=>`<div class="row"><div class="trk"><span class="fill" style="width:${Math.max(6,r[1]/mx*100)}%"></span><span class="nm">${r[2]?T.I(r[2],14)+'&nbsp; ':''}${r[0]}</span></div><span class="v">${pre}${r[1].toLocaleString()}</span></div>`).join('')}</div>`; };
+ch.barlist=(rows,pre='')=>{ const mx=Math.max(...rows.map(r=>r[1])), tot=rows.reduce((a,r)=>a+r[1],0); return `<div class="barlist">${rows.map((r,i)=>`<div class="bl-row"><div class="bl-top"><span class="bl-rank">${String(i+1).padStart(2,'0')}</span><span class="bl-name">${r[2]?T.I(r[2],14):''}${r[0]}</span><span class="bl-share">${Math.round(r[1]/tot*100)}%</span><b class="bl-val">${pre}${r[1].toLocaleString()}</b></div><div class="bl-track"><i style="width:${Math.max(2,r[1]/mx*100)}%"></i></div></div>`).join('')}</div>`; };
 ch.meter=(parts,c='')=>`<div class="meter ${c}">${parts.map(p=>`<i class="${p.c==='free'?'free':''}" style="flex-grow:${p.v};${p.c==='free'?'':`background:var(--${p.c})`}" title="${p.l||''}"></i>`).join('')}</div>`;
 ch.legend=(parts,vals=true)=>`<div class="legend">${parts.map(p=>`<span><i style="background:var(--${p.c==='free'?'line-3':p.c})"></i>${p.l}${vals&&p.t?` <b>${p.t}</b>`:''}</span>`).join('')}</div>`;
 ch.bullet=(rows)=>`<div class="vstack" style="gap:16px;width:100%">${rows.map(r=>`<div style="display:grid;grid-template-columns:110px 1fr 56px;gap:12px;align-items:center;font-size:13px"><span style="color:var(--fg-2)">${r.l}</span>
