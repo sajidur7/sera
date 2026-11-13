@@ -98,7 +98,7 @@ const H = T.H = {
   menu:(items)=>items.map(x=>x==='-'?'<div class="msep"></div>':x[0]==='#'?`<div class="mlabel">${x.slice(1)}</div>`:`<button class="mi ${x[3]||''}" role="menuitem">${x[1]?I(x[1],16):''}<span>${x[0]}</span>${x[2]?`<span class="end">${x[2]}</span>`:''}</button>`).join(''),
   card:(h,b,f='',c='')=>`<div class="card ${c}">${h?`<div class="card-h">${h}</div>`:''}<div class="card-b">${b}</div>${f?`<div class="card-f">${f}</div>`:''}</div>`,
   sk:(w,h=12,r=8)=>`<span class="sk" style="width:${w};height:${h}px;border-radius:${r}px"></span>`,
-  toast:(t,b,i='check-c')=>`<div class="toast">${I(i,18,'ok')}<div class="grow"><b>${t}</b>${b?`<p>${b}</p>`:''}</div>${H.ib('x','ghost xs','Dismiss','data-close')}</div>`,
+  toast:(t,b,i='check-c')=>`<div class="toast">${I(i,18,i==='check-c'?'ok':'')}<div class="grow"><b>${t}</b>${b?`<p>${b}</p>`:''}</div>${H.ib('x','ghost xs','Dismiss','data-close')}</div>`,
   bar:(v,c='')=>`<div class="bar ${c}"><i style="width:${v}%"></i></div>`,
   copy:(text,c='ghost sm')=>`<button class="btn icon ${c}" aria-label="Copy" data-tip="Copy" data-copy="${String(text).replace(/"/g,'&quot;')}">${I('copy',14)}</button>`,
   meter:(pct,n=17,tone='auto',w=100)=>{ const f=Math.round(pct/100*n), red=Math.floor(f/3), amb=Math.ceil(f/3); return `<span class="segmeter" role="meter" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" style="--w:${w}px">${Array.from({length:n},(_,i)=>`<i class="${i<f?(tone==='auto'?(i<red?'r':i<red+amb?'a':'g'):tone):''}"></i>`).join('')}</span>`; },
@@ -296,9 +296,9 @@ function rerender(i){
 }
 function showCode(stage){ const i=+stage.dataset.di; T.live[i].body=stage.querySelector('[data-body]'); const c=codeFor(i); stage.querySelector('.stage-code').innerHTML=c.js?hlJS(c.src):hlHTML(c.src); }
 function setKnob(el,v){ const box=el.closest('.knobs'); if(!box) return; const i=+box.dataset.for; T.live[i].state[el.dataset.knob]=v; rerender(i); }
-function toast(stage,txt){
+function toast(stage,txt,icon){
   let box=stage.querySelector(':scope>.toasts'); if(!box){ box=document.createElement('div'); box.className='toasts'; stage.appendChild(box); }
-  const [t,b]=txt.split('|'); box.insertAdjacentHTML('beforeend',H.toast(t,b)); const el=box.lastElementChild;
+  const [t,b]=txt.split('|'); box.insertAdjacentHTML('beforeend',H.toast(t,b,icon)); const el=box.lastElementChild;
   while(box.children.length>3) box.firstElementChild.remove();
   setTimeout(()=>{ el.style.transition='opacity .25s, transform .25s'; el.style.opacity='0'; el.style.transform='translateY(6px)'; setTimeout(()=>el.remove(),260); },3200);
 }
@@ -317,6 +317,12 @@ document.addEventListener('click',e=>{
   if(el=t.closest('.nav-group[data-g="1"]>.nav-label')){ const g=el.parentElement; g.classList.toggle('shut'); el.setAttribute('aria-expanded',!g.classList.contains('shut')); return; }
   if(el=t.closest('[data-preset-btn]')){ T.setPreset(el.dataset.presetBtn); return; }
   if(t.id==='navscrim') return rail(false);
+  if(el=t.closest('a[href="#"]')){
+    e.preventDefault();
+    const scr=el.closest('.frame,.stage');
+    if(scr){ const name=(el.querySelector('span:not(.end)')||el).textContent.trim()||'This screen'; toast(scr,`${name} is coming soon|This screen hasn’t been designed yet.`,'clock'); }
+    return;
+  }
   if(el=t.closest('a.nav-a,.pager a,.tile,a.chip')){ return; }
   if(el=t.closest('.seg>button')){
     const s=el.parentElement; [...s.children].forEach(b=>b.setAttribute('aria-pressed',b===el));
