@@ -1,0 +1,18 @@
+/* Sera base. Import once at your entry: import "./sera/global.css";
+   It also gives Vite a CSS asset, which is where the StyleX plugin appends its rules in production.
+   Element selectors are wrapped in :where() so they have zero specificity — component styles always win. */
+:root { color-scheme: light dark; }
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+:where(*, *::before, *::after) { box-sizing: border-box; }
+:where(html, body) { margin: 0; }
+:where(body) {
+  font: 400 14px/1.5 "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: light-dark(#f1f1f4, #1b1c1f);
+  color: light-dark(#121216, #f2f3f5);
+  -webkit-font-smoothing: antialiased;
+}
+:where(button, input, select, textarea) { font: inherit; color: inherit; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}

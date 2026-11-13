@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Sera — a calm, exact React + StyleX design system: 166 components, 116 screens, dark and light.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>Sera Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="sera.css">
+</head>
+<body>
+<header class="dtop" id="dtop">
+  <button class="btn icon ghost dtop-menu" data-nav-toggle aria-label="Open navigation" id="dmenu"></button>
+  <a class="brand-mark" href="#overview" id="logo"></a>
+  <nav class="dtop-links" id="dlinks"><a href="#overview" data-sec="docs">Docs</a><a href="#components" data-sec="comp">Components</a><a href="#screens" data-sec="screens">Screens</a><a href="#themes" data-sec="themes">Themes</a></nav>
+  <div class="dtop-tools"><button class="btn icon ghost" id="dsearch" aria-label="Search" data-tip="Search  /"></button><button class="btn icon ghost" id="dtheme" aria-label="Toggle theme"></button><button class="btn icon ghost" id="dsound" aria-label="Click sound" aria-pressed="false"></button><a class="btn sm primary" href="#installation">Get started</a></div>
+</header>
+<div class="app">
+  <aside class="rail" id="rail" aria-label="Documentation">
+    <div class="rail-search" id="rs"><input id="railq" placeholder="Search…" aria-label="Search pages"></div>
+    <nav id="nav"></nav>
+  </aside>
+  <div class="scrim-nav" id="navscrim" hidden></div>
+  <main class="main">
+    <div class="col" id="col"></div>
+  </main>
+</div>
+<script src="js/core.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/sources.js"></script>
+<script src="js/usage.js"></script>
+<script src="js/docs.js"></script>
+<script src="js/pages-1.js"></script>
+<script src="js/pages-2.js"></script>
+<script src="js/pages-3.js"></script>
+<script src="js/pages-4.js"></script>
+<script src="js/pages-5.js"></script>
+<script src="js/kit.js"></script>
+<script src="js/screens.js"></script>
+<script src="js/screens-2.js"></script>
+<script src="js/screens-3.js"></script>
+<script>T.K.flush();</script>
+<script>
+(function(){
+  var T=window.T, g=function(id){return document.getElementById(id)};
+  g('logo').innerHTML=T.logo(26)+'<span class="brand-name">Sera</span>';
+  g('dmenu').innerHTML=T.I('menu',18);
+  g('dsearch').innerHTML=T.I('search',16);
+  g('dsound').innerHTML=T.I('vol-x',16);
+  g('rs').insertAdjacentHTML('afterbegin',T.I('search',14));
+  var setThemeIcon=function(){ g('dtheme').innerHTML=T.I(T.theme()==='dark'?'sun':'moon',16); g('dtheme').setAttribute('data-tip',T.theme()==='dark'?'Light mode':'Dark mode'); };
+  g('dtheme').addEventListener('click',function(){ T.setTheme(T.theme()==='dark'?'light':'dark'); setThemeIcon(); });
+  g('dsound').addEventListener('click',function(){ T.sound=!T.sound; g('dsound').innerHTML=T.I(T.sound?'vol':'vol-x',16); g('dsound').setAttribute('aria-pressed',T.sound); if(T.sound) T.tick(); });
+  g('dsearch').addEventListener('click',function(){ if(innerWidth<=920) document.querySelector('[data-nav-toggle]').click(); g('railq').focus(); });
+  T.boot(); setThemeIcon();
+})();
+</script>
+</body>
+</html>

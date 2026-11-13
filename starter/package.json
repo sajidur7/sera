@@ -1,0 +1,30 @@
+{
+  "name": "sera-starter",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@stylexjs/stylex": "^0.19.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@stylexjs/unplugin": "^0.19.1",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.0"
+  },
+  "browserslist": [
+    "chrome >= 123",
+    "edge >= 123",
+    "safari >= 17.5",
+    "firefox >= 120"
+  ]
+}
