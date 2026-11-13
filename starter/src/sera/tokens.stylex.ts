@@ -77,6 +77,7 @@ export const shadow = stylex.defineVars({
   bevelFill: ld("0 1px 2px rgba(14,14,26,.18), 0 0 0 1px rgba(14,14,26,.25), inset 0 1px 0 rgba(255,255,255,.28), inset 0 -6px 12px rgba(0,0,0,.1)", "0 2px 4px rgba(0,0,0,.3), 0 0 0 1px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.28), inset 0 0 0 1px rgba(255,255,255,.12), inset 0 -6px 12px rgba(0,0,0,.14)"),
   bevelInv: ld("0 1px 2px rgba(14,14,26,.2), 0 0 0 1px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.16)", "0 2px 4px rgba(0,0,0,.3), 0 0 0 1px rgba(0,0,0,.5), inset 0 -6px 12px rgba(0,0,0,.08)"),
   lift: ld("0 1px 0 rgba(255,255,255,.9) inset, 0 1px 2px rgba(14,14,26,.08)", "0 1px 0 rgba(255,255,255,.04) inset, 0 1px 2px rgba(0,0,0,.45)"),
-  card: ld("0 1px 2px rgba(14,14,26,.05), 0 10px 28px -18px rgba(14,14,26,.28)", "0 1px 2px rgba(0,0,0,.25)"),
+  // cards are flat: a hairline, no drop shadow (kept as a token so a theme can bring one back)
+  card: ld("0 0 0 0 transparent", "0 0 0 0 transparent"),
   pop: ld("0 0 0 1px rgba(14,14,26,.13), 0 18px 40px -16px rgba(14,14,26,.3), 0 2px 6px rgba(14,14,26,.08)", "0 0 0 1px rgba(255,255,255,.11), 0 18px 44px -14px rgba(0,0,0,.85), 0 2px 6px rgba(0,0,0,.35)"),
 });

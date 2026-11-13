@@ -130,7 +130,7 @@ const sg = stylex.create({
   },
   grow: { flexGrow: 1 },
   sm: { height: 21, paddingInline: 9, fontSize: 12 },
-  on: { backgroundColor: color.segOn, color: color.fg, boxShadow: shadow.bevel },
+  on: { backgroundColor: color.segOn, color: color.fg, boxShadow: `inset 0 0 0 1px ${color.line2}` },
 });
 export type SegmentOption = string | { value: string; label: ReactNode; icon?: IconName };
 export function SegmentedControl({ options, value, defaultValue, onChange, size = "md", full, xstyle }: {

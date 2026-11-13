@@ -169,8 +169,9 @@ const patterns = {
   orbit: [0, 0.15, 0.3, 1.05, -1, 0.45, 0.9, 0.75, 0.6],
   scan: [0, 0, 0, 0.2, 0.2, 0.2, 0.4, 0.4, 0.4],
   dots: [0, 0.3, 0.6, 0.3, 0, 0.6, 0.6, 0.3, 0],
+  churn: [0.5, 0.1, 0.7, 0.3, 0, 0.6, 0.2, 0.8, 0.4],
 } as const;
-/** Sera’s signature loader: nine squares, four patterns. */
+/** Sera’s signature loader: nine squares, five patterns. */
 export function PixelLoader({ pattern = "drive", size = 4, accent }: { pattern?: keyof typeof patterns; size?: number; accent?: boolean }) {
   return (
     <span role="status" aria-label="Loading" {...stylex.props(sp.pix, sp.pixSize(size))}>
@@ -221,7 +222,7 @@ export function ToastProvider({ children, duration = 3200 }: { children: ReactNo
 // #region EmptyState
 const em = stylex.create({
   root: { display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 10, maxWidth: 360, padding: 12, marginInline: "auto" },
-  glyph: { width: 48, height: 48, borderRadius: radius.lg, display: "grid", placeItems: "center", backgroundColor: color.raised, boxShadow: `inset 0 0 0 1px ${color.line2}, ${shadow.lift}`, color: color.fg2, marginBottom: 4 },
+  glyph: { width: 48, height: 48, borderRadius: radius.lg, display: "grid", placeItems: "center", backgroundColor: color.raised, boxShadow: `inset 0 0 0 1px ${color.line2}`, color: color.fg2, marginBottom: 4 },
   actions: { display: "flex", gap: 8, marginTop: 6 },
   code: { fontFamily: font.mono, fontSize: 12, color: color.fg4 },
 });

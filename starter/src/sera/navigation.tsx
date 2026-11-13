@@ -21,7 +21,7 @@ const sn = stylex.create({
     backgroundColor: { default: "transparent", ":hover": color.hover }, color: { default: color.fg3, ":hover": color.fg },
     fontFamily: font.sans, fontSize: 13.5, textDecoration: "none", textAlign: "left", cursor: "pointer",
   },
-  on: { backgroundColor: color.raised, color: color.fg, boxShadow: `inset 0 0 0 1px ${color.line}, ${shadow.lift}` },
+  on: { backgroundColor: color.raised, color: color.fg, boxShadow: `inset 0 0 0 1px ${color.line2}` },
   icOn: { color: color.accent, display: "inline-flex" },
   end: { marginLeft: "auto", fontFamily: font.mono, fontSize: 11, color: color.fg4 },
   label: { paddingTop: 14, paddingBottom: 6, paddingInline: 10, fontFamily: font.mono, fontSize: 10.5, fontWeight: 500, letterSpacing: ".08em", textTransform: "uppercase", color: color.fg4 },
@@ -179,7 +179,7 @@ export function TabMenu({ tabs, visible = 4, value, onChange }: { tabs: TabItem[
 const pg = stylex.create({
   row: { display: "flex", alignItems: "center", gap: 3 },
   n: { minWidth: 32, height: 32, paddingInline: 6, borderWidth: 0, borderRadius: radius.md, backgroundColor: { default: "transparent", ":hover": color.hover }, color: { default: color.fg3, ":hover": color.fg }, fontFamily: font.sans, fontVariantNumeric: "tabular-nums", cursor: "pointer" },
-  on: { backgroundColor: color.raised, color: color.fg, boxShadow: `inset 0 0 0 1px ${color.line2}, ${shadow.lift}` },
+  on: { backgroundColor: color.raised, color: color.fg, boxShadow: `inset 0 0 0 1px ${color.line2}` },
   gap: { color: color.fg4, paddingInline: 4 },
 });
 const pages = (cur: number, total: number) => {

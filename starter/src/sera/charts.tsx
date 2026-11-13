@@ -2,7 +2,7 @@
  * Data & charts — SVG that reads colour tokens, so both themes just work.
  * Stat · StatRow · Delta · Legend · LineChart · BarChart · DonutChart · Sparkline · BarList · BreakdownBar ·
  * Gauge · Heatmap · PillBarChart · ValueChart · UsageMeter · FunnelChart · ScatterChart · BulletChart ·
- * ComboChart · RadarChart
+ * ComboChart · RadarChart · StatTiles · StatTile · TargetSegments · MiniBars · DotMatrix · RangeTrack
  */
 import * as stylex from "@stylexjs/stylex";
 import { useId, useState, type ReactNode } from "react";
@@ -45,8 +45,10 @@ const st = stylex.create({
   delta: { display: "inline-flex", alignItems: "center", gap: 3, height: 20, paddingInline: 6, borderRadius: radius.sm, fontSize: 12, fontWeight: 600, fontVariantNumeric: "tabular-nums" },
   up: { backgroundColor: color.okSoft, color: color.ok }, down: { backgroundColor: color.badSoft, color: color.bad }, flat: { backgroundColor: color.sunken, color: color.fg3 },
 });
-export function Delta({ value, suffix = "%" }: { value: number; suffix?: string }) {
-  return <span {...stylex.props(st.delta, value > 0 ? st.up : value < 0 ? st.down : st.flat)}>{value !== 0 && <Icon name={value > 0 ? "arrow-up" : "arrow-down"} size={11} />}{Math.abs(value)}{suffix}</span>;
+/** Change against the last period. Pass `invert` when a fall is the good direction (cycle time, churn). */
+export function Delta({ value, suffix = "%", invert }: { value: number; suffix?: string; invert?: boolean }) {
+  const good = invert ? value < 0 : value > 0;
+  return <span {...stylex.props(st.delta, value === 0 ? st.flat : good ? st.up : st.down)}>{value !== 0 && <Icon name={value > 0 ? "arrow-up" : "arrow-down"} size={11} />}{Math.abs(value)}{suffix}</span>;
 }
 export function Stat({ label, icon, value, unit, delta, sub, trend }: { label: ReactNode; icon?: IconName; value: ReactNode; unit?: ReactNode; delta?: number; sub?: ReactNode; trend?: ReactNode }) {
   return (
@@ -396,3 +398,84 @@ export function RadarChart({ axes, series, size = 280 }: { axes: string[]; serie
 }
 // #endregion
 export type { XStyle };
+
+// #region StatTile
+const rise = stylex.keyframes({ from: { transform: "scaleY(.15)", opacity: 0.3 } });
+const sv = stylex.create({
+  row: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(210px, 100%), 1fr))", width: "100%", overflow: "hidden", borderRadius: radius.xl, backgroundColor: color.surface, boxShadow: `inset 0 0 0 1px ${color.line}, ${shadow.card}` },
+  tile: { display: "flex", flexDirection: "column", gap: 8, minWidth: 0, paddingTop: 14, paddingBottom: 13, paddingInline: 16, boxShadow: `-1px 0 0 ${color.line}, 0 -1px 0 ${color.line}` },
+  head: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 },
+  label: { display: "inline-flex", alignItems: "center", gap: 6, fontFamily: font.mono, fontSize: 10.5, fontWeight: 500, letterSpacing: ".08em", textTransform: "uppercase", color: color.fg3 },
+  period: { fontFamily: font.mono, fontSize: 10.5, color: color.fg4, whiteSpace: "nowrap" },
+  valueRow: { display: "flex", alignItems: "center", gap: 10 },
+  value: { fontSize: 26, lineHeight: 1.1, fontWeight: 600, letterSpacing: "-.03em", fontVariantNumeric: "tabular-nums", color: color.fg },
+  viz: { display: "flex", alignItems: "flex-end", height: 26, marginTop: 2 },
+  note: { fontSize: 12, color: color.fg3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" },
+  side: { flexGrow: 1, display: "flex", justifyContent: "flex-end", alignItems: "flex-end", minWidth: 36, maxWidth: 84, height: 20, marginLeft: "auto" },
+  valueSmall: { fontSize: 23, whiteSpace: "nowrap" },
+  segs: { display: "flex", gap: 2, width: "100%", height: 22 },
+  cell: { flexGrow: 1, borderRadius: 2, backgroundColor: color.sunken, boxShadow: `inset 0 0 0 1px ${color.line}` },
+  lit: { backgroundColor: color.accent, boxShadow: "none" },
+  bars: { display: "flex", alignItems: "flex-end", gap: 2, width: "100%", height: 26, cursor: "crosshair", touchAction: "pan-y" },
+  bar: (h: number, delay: string) => ({ flexGrow: 1, minWidth: 1, height: `${h}%`, borderRadius: 1.5, backgroundColor: color.c7, transformOrigin: "bottom", animationName: rise, animationDuration: ".5s", animationFillMode: "backwards", animationDelay: delay }),
+  barHi: { backgroundColor: color.accent },
+  barDim: { opacity: 0.45 },
+  barCur: { opacity: 1, backgroundColor: color.fg },
+  dots: { display: "grid", gridTemplateRows: "repeat(4, 5px)", gridAutoFlow: "column", gridAutoColumns: "minmax(0, 1fr)", gap: 2, width: "100%" },
+  range: { display: "flex", alignItems: "center", gap: 8, width: "100%", height: 22, fontFamily: font.mono, fontSize: 10, color: color.fg4 },
+  track: { position: "relative", flexGrow: 1, height: 8, borderRadius: 2, backgroundColor: color.sunken, backgroundImage: `repeating-linear-gradient(90deg, ${color.line2} 0 1px, transparent 1px 10px)`, boxShadow: `inset 0 0 0 1px ${color.line}` },
+  span: (l: number, w: number) => ({ position: "absolute", top: 0, bottom: 0, left: `${l}%`, width: `${w}%`, backgroundColor: color.okSoft }),
+  mark: (l: number) => ({ position: "absolute", top: "50%", left: `${l}%`, width: 10, height: 10, marginTop: -5, marginLeft: -5, borderRadius: "50%" }),
+  was: { backgroundColor: color.surface, boxShadow: `inset 0 0 0 1.5px ${color.fg4}` },
+  now: { backgroundColor: color.ok, boxShadow: `0 0 0 3px ${color.okSoft}` },
+});
+/** A strip of stat tiles sharing hairline dividers. They wrap on narrow screens. */
+export const StatTiles = ({ children }: { children: ReactNode }) => <div {...stylex.props(sv.row)}>{children}</div>;
+/** A stat with the picture that suits it. Put TargetSegments, MiniBars, DotMatrix or RangeTrack inside. `compact` moves the picture beside the number. */
+export function StatTile({ label, icon, period, value, delta, invert, note, compact, children, xstyle }: { label: ReactNode; icon?: IconName; period?: ReactNode; value: ReactNode; delta?: number; invert?: boolean; note?: ReactNode; compact?: boolean; children?: ReactNode; xstyle?: XStyle }) {
+  return (
+    <div {...stylex.props(sv.tile, xstyle)}>
+      <div {...stylex.props(sv.head)}><span {...stylex.props(sv.label)}>{icon && <Icon name={icon} size={13} />}{label}</span>{period && <span {...stylex.props(sv.period)}>{period}</span>}</div>
+      <div {...stylex.props(sv.valueRow)}><span {...stylex.props(sv.value, compact && sv.valueSmall)}>{value}</span>{delta !== undefined && <Delta value={delta} invert={invert} />}{compact && children && <span {...stylex.props(sv.side)}>{children}</span>}</div>
+      {!compact && children && <div {...stylex.props(sv.viz)}>{children}</div>}
+      {note && <span {...stylex.props(sv.note)}>{note}</span>}
+    </div>
+  );
+}
+/** Progress toward a target as tall segments. `value` is a percentage. */
+export function TargetSegments({ value, segments = 24 }: { value: number; segments?: number }) {
+  const filled = Math.round((Math.max(0, Math.min(100, value)) / 100) * segments);
+  return <div role="meter" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100} {...stylex.props(sv.segs)}>{Array.from({ length: segments }, (_, i) => <span key={i} {...stylex.props(sv.cell, i < filled && sv.lit)} />)}</div>;
+}
+/** One bar per period. Move across them to read a single bar; `onHover` gets its index, or null on leave. */
+export function MiniBars({ data, highlight, onHover }: { data: number[]; highlight?: number; onHover?: (index: number | null) => void }) {
+  const [cur, setCur] = useState<number | null>(null);
+  const max = Math.max(...data) || 1;
+  const set = (i: number | null) => { setCur(i); onHover?.(i); };
+  return (
+    <div role="img" aria-label="Bars by period" onPointerLeave={() => set(null)}
+      onPointerMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); set(Math.max(0, Math.min(data.length - 1, Math.floor(((e.clientX - r.left) / r.width) * data.length)))); }} {...stylex.props(sv.bars)}>
+      {data.map((v, i) => <span key={i} {...stylex.props(sv.bar(Math.max(6, (v / max) * 100), `${i * 12}ms`), i === highlight && sv.barHi, cur !== null && sv.barDim, cur === i && sv.barCur)} />)}
+    </div>
+  );
+}
+/** A share as lit squares: `value` of `total`, filled column by column. */
+export function DotMatrix({ value, total = 100 }: { value: number; total?: number }) {
+  return <div role="img" aria-label={`${value} of ${total}`} {...stylex.props(sv.dots)}>{Array.from({ length: total }, (_, i) => <span key={i} {...stylex.props(sv.cell, i < value && sv.lit)} />)}</div>;
+}
+/** Where a number sits now against where it was, on a scale from `min` to `max`. */
+export function RangeTrack({ min, max, now, was, unit = "" }: { min: number; max: number; now: number; was?: number; unit?: string }) {
+  const at = (v: number) => ((Math.max(min, Math.min(max, v)) - min) / (max - min)) * 100;
+  return (
+    <div {...stylex.props(sv.range)}>
+      <span>{min}{unit}</span>
+      <div {...stylex.props(sv.track)}>
+        {was !== undefined && <span {...stylex.props(sv.span(Math.min(at(now), at(was)), Math.abs(at(was) - at(now))))} />}
+        {was !== undefined && <span {...stylex.props(sv.mark(at(was)), sv.was)} />}
+        <span {...stylex.props(sv.mark(at(now)), sv.now)} />
+      </div>
+      <span>{max}{unit}</span>
+    </div>
+  );
+}
+// #endregion

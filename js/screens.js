@@ -11,13 +11,12 @@ const stageTag={Lead:'',Qualified:'sky',Proposal:'blue',Negotiation:'violet',Won
 const sc=[];
 const S=(s,n,d,html,notes,tag='App')=>sc.push({s:'screen-'+s,n,d,html,notes,tag,wide:true});
 
-S('home','Home','The morning view: four numbers, the trend, what needs attention and what the assistant already did.',()=>app('Home','Good morning, Maya',`${search}${H.ib('bell','ghost sm','Notifications')}${H.btn('New deal','primary sm','plus')}`,
- `<div class="statrow">${[['Pipeline','$1.24M',12],['Won · 30d','$212k',8],['Win rate','34%',6],['Avg cycle','41 days',-9]].map(s=>`<div class="stat"><span class="lab">${s[0]}</span><span class="row" style="gap:10px"><span class="val">${s[1]}</span>${H.delta(s[2])}</span></div>`).join('')}</div>
- <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:12px;flex:1;min-height:0">
-  <div class="card vstack" style="gap:0">${cardH('Revenue',H.seg(['Month','Quarter','Year'],0,'sm'))}<div class="card-b vstack" style="flex:1">${ch.legend([{c:'c1',l:'2026',t:'$612k'},{c:'c3',l:'2025',t:'$498k'}])}${ch.line({series:[{d:ch.series(12,40,14,2.4,5),c:'c1',area:true},{d:ch.series(12,30,12,1.2,8),c:'c3',dash:true}],labels:ch.months,pre:'$',h:440})}</div></div>
-  <div class="card vstack" style="gap:0">${cardH('Needs attention',H.tag('3','coral pill'))}<div class="vstack" style="padding:6px 8px;gap:2px">${[['Halden Freight','No reply in 12 days','coral'],['Mira Labs','Close date moved twice','sand'],['Oakline','Champion left Oct 3','coral'],['Kestrel AI','Legal review stalled','sand'],['Brightwater','No next step booked','sand'],['Cobalt Bank','Budget owner unknown','sand']].map((r,k)=>`<div class="li btnlike" style="border-radius:10px;min-height:52px;padding:8px"><span class="av sm sq" style="--t:var(--c${k+2})">${r[0][0]}</span><div class="grow"><b>${r[0]}</b><small>${r[1]}</small></div><span class="sdot ${r[2]==='coral'?'bad':'warn'}"></span></div>`).join('')}</div><div style="margin-top:auto;padding:12px 14px;border-top:1px solid var(--line)">${H.btn('Ask Lumen about these','block sm','bot')}</div></div>
- </div>
- <div class="grid3" style="flex:none">${[['Follow-ups drafted','12 emails waiting for review','mail','c1'],['Meetings today','3 calls · next at 11:30','calendar','c2'],['Tasks due','5 tasks · 2 overdue','check-c','c6']].map(c=>`<div class="card pad row" style="gap:12px"><span class="av sq" style="--t:var(--${c[3]})">${I(c[2],15)}</span><div class="grow"><b style="font-weight:500">${c[0]}</b><div class="t-small">${c[1]}</div></div>${I('chev-right',16)}</div>`).join('')}</div>`),'stat,line-chart,list,side-nav,card,bezel');
+S('home','Home','The morning view: four numbers, insights you can scrub, the relationships that need attention, and what the assistant suggests and is doing right now.',()=>app('Home','Good morning, Maya',`${search}${H.ib('bell','ghost sm','Notifications')}${H.btn('New deal','primary sm','plus')}`,
+ `${T.statTiles()}
+ <div style="display:grid;grid-template-columns:1.62fr 1fr;gap:12px;flex:1;min-height:0">
+  <div class="vstack" style="gap:12px;min-height:0">${T.insights('width:100%',660,112)}${T.records(4,{compact:true,style:'flex:none'})}</div>
+  <div class="vstack" style="gap:12px;min-height:0">${T.rec({style:'width:100%',compact:true})}${T.taskRows('width:100%','Lumen is working')}</div>
+ </div>`),'stat,insight-card,records-table,recommendation-card,task-rows,side-nav,card');
 
 S('analytics','Analytics','Revenue, mix, conversion and when your team is busiest, on one page.',()=>app('Reports','Analytics',`${H.seg(['30D','90D','1Y'],1,'sm')}${H.btn('Export','ghost sm','download')}${H.btn('Share','sm','link')}`,
  `<div style="display:grid;grid-template-columns:1.6fr 1fr;gap:12px">

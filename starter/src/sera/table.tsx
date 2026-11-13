@@ -1,6 +1,7 @@
 /**
  * Table & list.
- * DataTable · Table (primitives) · SelectionToolbar · List · MetadataList · OverflowList · TreeList · Timeline
+ * DataTable · Table (primitives) · SelectionToolbar · List · MetadataList · OverflowList · TreeList · Timeline ·
+ * RecordsTable · FilterTable
  */
 import * as stylex from "@stylexjs/stylex";
 import { useMemo, useState, type ReactNode } from "react";
@@ -9,7 +10,9 @@ import { Icon, type IconName } from "./icons";
 import { Button, IconButton } from "./action";
 import { Popover } from "./overlay";
 import { Checkbox } from "./forms";
-import type { XStyle } from "./lib";
+import { Avatar, Tag, type TagTone, type Tint } from "./content";
+import { SegmentMeter, StatusDot, StatusPill } from "./feedback";
+import { useControllable, type XStyle } from "./lib";
 
 // #region Table
 const tb = stylex.create({
@@ -171,6 +174,98 @@ export function Timeline({ events }: { events: { icon: IconName; title: ReactNod
           <div><div {...stylex.props(tl.head)}><span {...stylex.props(tl.title)}>{e.title}</span><time {...stylex.props(tl.time)}>{e.time}</time></div>{e.body && <p {...stylex.props(tl.body)}>{e.body}</p>}</div>
         </div>
       ))}
+    </div>
+  );
+}
+// #endregion
+
+// #region RecordsTable
+const rt = stylex.create({
+  who: { display: "flex", alignItems: "center", gap: 10 },
+  name: { display: "block", fontWeight: 500, color: color.fg },
+  sub: { display: "block", fontSize: 12, color: color.fg3 },
+  tags: { display: "flex", gap: 4 },
+  rel: { display: "flex", alignItems: "center", gap: 8 },
+  arrow: { display: "inline-flex", color: color.fg4 },
+  arrowOn: { color: color.fg },
+  row: { cursor: "pointer" },
+});
+export type RecordRow = { id: string; name: string; email: string; tint?: Tint; company: string; tags: { label: string; tone?: TagTone }[]; strength: number; lastContactDays: number; value: number };
+type RecordKey = "name" | "company" | "strength" | "lastContactDays" | "value";
+const strengthLabel = (v: number) => (v >= 70 ? "Strong" : v >= 40 ? "Warm" : "Cold");
+/** A CRM-style grid: who they are, where they work, how they are tagged and how strong the relationship is. Click a header to sort. */
+export function RecordsTable({ rows, onOpen, formatValue = (v: number) => `$${v.toLocaleString()}` }: { rows: RecordRow[]; onOpen?: (id: string) => void; formatValue?: (value: number) => string }) {
+  const [sort, setSort] = useState<{ key: RecordKey; dir: 1 | -1 }>({ key: "strength", dir: -1 });
+  const sorted = useMemo(() => [...rows].sort((a, b) => (a[sort.key] > b[sort.key] ? 1 : a[sort.key] < b[sort.key] ? -1 : 0) * sort.dir), [rows, sort]);
+  const head = (key: RecordKey, label: string, numeric?: boolean) => (
+    <th aria-sort={sort.key === key ? (sort.dir === 1 ? "ascending" : "descending") : "none"} {...stylex.props(tb.th, numeric && tb.num)}>
+      <button type="button" onClick={() => setSort({ key, dir: sort.key === key && sort.dir === 1 ? -1 : 1 })} {...stylex.props(dt.sort)}>
+        {label}<span {...stylex.props(rt.arrow, sort.key === key && rt.arrowOn)}><Icon name={sort.key !== key ? "chevs" : sort.dir === 1 ? "arrow-up" : "arrow-down"} size={12} /></span>
+      </button>
+    </th>
+  );
+  return (
+    <TableWrap>
+      <thead><tr>{head("name", "Person")}{head("company", "Company")}<Th>Tags</Th>{head("strength", "Relationship")}{head("lastContactDays", "Last contact")}{head("value", "Value", true)}</tr></thead>
+      <tbody>
+        {sorted.map((r) => (
+          <tr key={r.id} onClick={() => onOpen?.(r.id)} {...stylex.props(tb.tr, onOpen && rt.row)}>
+            <Td><span {...stylex.props(rt.who)}><Avatar name={r.name} tint={r.tint} size="sm" /><span><span {...stylex.props(rt.name)}>{r.name}</span><span {...stylex.props(rt.sub)}>{r.email}</span></span></span></Td>
+            <Td>{r.company}</Td>
+            <Td><span {...stylex.props(rt.tags)}>{r.tags.map((t) => <Tag key={t.label} tone={t.tone}>{t.label}</Tag>)}</span></Td>
+            <Td><span {...stylex.props(rt.rel)}><SegmentMeter value={r.strength} segments={9} width={44} tone={r.strength >= 70 ? "ok" : r.strength >= 40 ? "warn" : "bad"} />{strengthLabel(r.strength)}</span></Td>
+            <Td>{r.lastContactDays === 0 ? "Today" : `${r.lastContactDays}d ago`}</Td>
+            <Td numeric>{formatValue(r.value)}</Td>
+          </tr>
+        ))}
+      </tbody>
+    </TableWrap>
+  );
+}
+// #endregion
+
+// #region FilterTable
+const fl = stylex.create({
+  root: { width: "100%", maxWidth: 560, overflow: "hidden", borderRadius: radius.xl, backgroundColor: color.surface, boxShadow: `inset 0 0 0 1px ${color.line}, ${shadow.card}` },
+  chips: { display: "flex", flexWrap: "wrap", gap: 6, paddingBlock: 12, paddingInline: 14, borderBottomWidth: 1, borderBottomStyle: "solid", borderBottomColor: color.line },
+  chip: { display: "inline-flex", alignItems: "center", gap: 7, height: 28, paddingInline: 11, borderWidth: 0, borderRadius: radius.pill, backgroundColor: color.raised, boxShadow: `inset 0 0 0 1px ${color.line2}`, color: color.fg2, fontFamily: font.sans, fontSize: 12.5, cursor: "pointer" },
+  chipOn: { backgroundColor: color.accentSoft, color: color.accent, boxShadow: `inset 0 0 0 1px ${color.accentLine}` },
+  count: { fontWeight: 600, fontVariantNumeric: "tabular-nums" },
+  row: { display: "flex", alignItems: "center", gap: 12, minHeight: 52, paddingInline: 14, borderTopWidth: { default: 1, ":first-child": 0 }, borderTopStyle: "solid", borderTopColor: color.line },
+  main: { flexGrow: 1, minWidth: 0 },
+  title: { display: "block", fontWeight: 500, color: color.fg },
+  sub: { display: "block", fontSize: 12.5, color: color.fg3 },
+  foot: { paddingBlock: 10, paddingInline: 14, borderTopWidth: 1, borderTopStyle: "solid", borderTopColor: color.line, fontSize: 12.5, color: color.fg3 },
+});
+type FilterTone = "neutral" | "accent" | "ok" | "warn" | "bad" | "info";
+export type FilterRow = { id: string; title: ReactNode; detail?: ReactNode; status: string; end?: ReactNode };
+export type FilterStatus = { value: string; tone?: FilterTone };
+/** A list with status chips on top. Picking a chip narrows the list, and the counts stay in view. */
+export function FilterTable({ rows, statuses, value, onChange, noun = "tasks" }: { rows: FilterRow[]; statuses: FilterStatus[]; value?: string | null; onChange?: (status: string | null) => void; noun?: string }) {
+  const [cur, setCur] = useControllable<string | null>(value, null, onChange);
+  const shown = cur ? rows.filter((r) => r.status === cur) : rows;
+  const chip = (label: string, v: string | null, n: number, tone?: FilterTone) => (
+    <button key={label} type="button" aria-pressed={cur === v} onClick={() => setCur(v)} {...stylex.props(fl.chip, cur === v && fl.chipOn)}>
+      {tone && <StatusDot tone={tone} />}{label}<span {...stylex.props(fl.count)}>{n}</span>
+    </button>
+  );
+  return (
+    <div {...stylex.props(fl.root)}>
+      <div role="group" aria-label="Filter by status" {...stylex.props(fl.chips)}>
+        {chip("All", null, rows.length)}{statuses.map((s) => chip(s.value, s.value, rows.filter((r) => r.status === s.value).length, s.tone))}
+      </div>
+      <div role="list">
+        {shown.map((r) => {
+          const s = statuses.find((x) => x.value === r.status);
+          return (
+            <div key={r.id} role="listitem" {...stylex.props(fl.row)}>
+              <span {...stylex.props(fl.main)}><span {...stylex.props(fl.title)}>{r.title}</span>{r.detail && <span {...stylex.props(fl.sub)}>{r.detail}</span>}</span>
+              {r.end}<StatusPill tone={s?.tone}>{r.status}</StatusPill>
+            </div>
+          );
+        })}
+      </div>
+      <div {...stylex.props(fl.foot)}>{shown.length} of {rows.length} {noun}</div>
     </div>
   );
 }
