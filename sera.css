@@ -1254,5 +1254,5 @@ a,button,[role=button],[role=tab],[role=radio],[role=checkbox],[role=switch],sum
 .ph+.lede{margin-top:18px}
 
 /* overview: wordmark as page title */
-.ph h1.ph-logo{display:flex;line-height:0;margin-bottom:14px}
+.ph h1.ph-logo{display:flex;line-height:0;margin-bottom:12px}
 .ph h1.ph-logo svg{display:block;height:auto;max-width:100%}

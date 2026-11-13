@@ -12,7 +12,7 @@ T.reg('Get started',[
 {s:'overview',n:'Overview',render(){
   const comps=T.groups.filter(g=>g.kind==='c'), total=comps.reduce((a,g)=>a+g.pages.length,0), scrN=T.groups.filter(g=>g.kind==='screen').reduce((a,g)=>a+g.pages.length,0);
   const go=[['installation','download','Installation','Create an app or add Sera to yours.'],['components','grid','Components',`${total} components in ${comps.length} groups, each with StyleX source.`],['screens','web','Screens',`${scrN} product screens built only from Sera.`],['themes','palette','Themes','Dark and light, five accent presets.']];
-  return `<header class="ph"><h1 class="ph-logo">${T.logo(84)}</h1><div class="pmeta">React + StyleX · source you own</div></header>
+  return `<header class="ph"><h1 class="ph-logo">${T.logo(52)}</h1><div class="pmeta">React + StyleX · source you own</div></header>
   <p class="lede">A calm, exact design system for product UI. Every component is React + StyleX source you own — copy it in, or start a new app with one script. Dark and light come from the same tokens.</p>
   <div class="row wrap" style="gap:8px;margin-bottom:34px">${H.btn('Get started','primary','','arrow-right','onclick="location.hash=\'installation\'"')}${H.btn('Browse components','','','','onclick="location.hash=\'components\'"')}</div>
   <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr))">${go.map(g=>`<a class="card click" href="#${g[0]}" style="padding:18px"><span class="bmark" style="background:var(--raised-2);color:var(--fg)">${I(g[1],16)}</span><b style="display:block;margin-top:16px;font-weight:600">${g[2]}</b><span class="t-small">${g[3]}</span></a>`).join('')}</div>
@@ -104,7 +104,7 @@ T.reg('Foundations',[
  }},
 {s:'iconography',n:'Iconography',tile:`<div class="row wrap" style="gap:14px;justify-content:center;width:220px;margin:auto">${['home','search','bell','user','chart','flow','calendar','mail','bot','zap'].map(n=>I(n,22)).join('')}</div>`,
  render(){ return head('Foundations','Iconography',`${Object.keys(T.icons).length} line icons on a 24px grid with a 1.8 stroke and round joins. Click one to copy its name.`)+
-  `<div class="rail-search" style="max-width:320px;margin:22px 0 14px">${I('search',14)}<input data-filter="#iconhost" placeholder="Filter icons"></div><div id="iconhost" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px">${Object.keys(T.icons).map(n=>`<button data-item data-copy="${n}" class="card" style="height:92px;border:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--fg-2)">${I(n,22)}<span class="mono" style="font-size:11px;color:var(--fg-4)">${n}</span></button>`).join('')}</div>`;
+  `<div class="rail-search" style="max-width:320px;margin:22px 0 14px">${I('search',14)}<input data-filter="#iconhost" placeholder="Filter icons"></div><div id="iconhost" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px">${Object.keys(T.icons).map(n=>`<button data-item data-copy-icon="${n}" title="Copy SVG" aria-label="Copy ${n} icon as SVG" class="card" style="height:92px;border:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--fg-2)">${I(n,22)}<span class="mono" style="font-size:11px;color:var(--fg-4)">${n}</span></button>`).join('')}</div>`;
  }},
 ],'doc','Foundations');
 

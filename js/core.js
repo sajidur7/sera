@@ -302,6 +302,18 @@ function toast(stage,txt,icon){
   while(box.children.length>3) box.firstElementChild.remove();
   setTimeout(()=>{ el.style.transition='opacity .25s, transform .25s'; el.style.opacity='0'; el.style.transform='translateY(6px)'; setTimeout(()=>el.remove(),260); },3200);
 }
+/* Sidebar items inside screens open the matching designed screen.
+   Map "workspace|current nav label" → screen slug by reading each screen's own sidebar once. */
+let navMap=null;
+function screenFor(ws,label,group){
+  if(!navMap){ navMap={};
+    T.pages.filter(p=>p.kind==='screen').forEach(p=>{ let h; try{ h=typeof p.html==='function'?p.html():p.html; }catch(_){ return; }
+      const w=(h.match(/class="wsw"[^>]*>[\s\S]*?<b>([^<]+)<\/b>/)||[])[1], c=(h.match(/aria-current="page">[\s\S]*?<span[^>]*>([^<]+)<\/span>/)||[])[1];
+      if(w&&c&&!navMap[w+'|'+c]) navMap[w+'|'+c]=p.s; });
+  }
+  const lc=label.toLowerCase();
+  return (T.pages.find(p=>p.kind==='screen'&&p.group===group&&p.n.toLowerCase()===lc)||{}).s || (ws&&navMap[ws+'|'+label]) || null;
+}
 function selSync(scope){
   const rows=$$('tbody [role=checkbox]',scope), on=rows.filter(r=>r.getAttribute('aria-checked')==='true');
   rows.forEach(r=>{ const tr=r.closest('tr'); tr&&tr.setAttribute('aria-selected',r.getAttribute('aria-checked')==='true'); });
@@ -317,10 +329,17 @@ document.addEventListener('click',e=>{
   if(el=t.closest('.nav-group[data-g="1"]>.nav-label')){ const g=el.parentElement; g.classList.toggle('shut'); el.setAttribute('aria-expanded',!g.classList.contains('shut')); return; }
   if(el=t.closest('[data-preset-btn]')){ T.setPreset(el.dataset.presetBtn); return; }
   if(t.id==='navscrim') return rail(false);
-  if(el=t.closest('a[href="#"]')){
+  if((el=t.closest('a[href="#"]'))&&!t.closest('.tile-prev')){
     e.preventDefault();
     const scr=el.closest('.frame,.stage');
-    if(scr){ const name=(el.querySelector('span:not(.end)')||el).textContent.trim()||'This screen'; toast(scr,`${name} is coming soon|This screen hasn’t been designed yet.`,'clock'); }
+    if(scr){
+      const name=[...el.querySelectorAll(':scope>span:not(.end)')].map(s=>s.textContent.trim()).filter(Boolean)[0]||el.textContent.trim()||'This screen';
+      const ws=el.closest('.side')?.querySelector('.wsw b')?.textContent.trim();
+      const cur=T.by[(location.hash||'#').slice(1)];
+      const to=el.closest('.snav')&&screenFor(ws,name,cur&&cur.group);
+      if(to){ if(!cur||to!==cur.s) location.hash='#'+to; return; }
+      toast(scr,`${name} is coming soon|This screen hasn’t been designed yet.`,'clock');
+    }
     return;
   }
   if(el=t.closest('a.nav-a,.pager a,.tile,a.chip')){ return; }
@@ -354,6 +373,9 @@ document.addEventListener('click',e=>{
   if(el=t.closest('[data-copy-installer]')){ const go=txt=>copyText(txt,el); if(T.installer) go(T.installer); else fetch('create-sera.mjs').then(r=>r.text()).then(x=>{T.installer=x;go(x);}).catch(()=>{ el.querySelector('span').textContent='Open the file instead'; }); return; }
   if(el=t.closest('[data-codemodal]')){ T.codeModal(curSlug); return; }
   if(el=t.closest('[data-copycode]')){ const st=el.closest('.stage'); const i=+st.dataset.di; T.live[i].body=st.querySelector('[data-body]'); copyText(codeFor(i).src,el); return; }
+  if(el=t.closest('[data-copy-icon]')){ const n=el.dataset.copyIcon, lab=el.querySelector('span');
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]||''}</svg>`;
+    copyText(svg); if(lab){ clearTimeout(el._t); lab.textContent='Copied SVG'; lab.style.color='var(--ok)'; el._t=setTimeout(()=>{ lab.textContent=n; lab.style.color=''; },1200); } return; }
   if(el=t.closest('[data-copy]')){ copyText(el.dataset.copy,el); return; }
   if(el=t.closest('.pg button[data-p]')){ const g=el.parentElement, bs=$$('button[data-p]',g); let k=bs.findIndex(b=>b.getAttribute('aria-current')); const v=el.dataset.p; k = v==='prev'?Math.max(0,k):v==='next'?k:+v; return pgSet(g,v,bs); }
   if(el=t.closest('.stars button')){ const bs=[...el.parentElement.children], k=bs.indexOf(el); bs.forEach((b,j)=>b.classList.toggle('on',j<=k)); const o=el.closest('.stage-body,.field'); const out=o&&o.querySelector('[data-rating]'); if(out) out.textContent=(k+1)+'.0'; return; }
