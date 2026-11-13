@@ -12,7 +12,7 @@ T.reg('Get started',[
 {s:'overview',n:'Overview',render(){
   const comps=T.groups.filter(g=>g.kind==='c'), total=comps.reduce((a,g)=>a+g.pages.length,0), scrN=T.groups.filter(g=>g.kind==='screen').reduce((a,g)=>a+g.pages.length,0);
   const go=[['installation','download','Installation','Create an app or add Sera to yours.'],['components','grid','Components',`${total} components in ${comps.length} groups, each with StyleX source.`],['screens','web','Screens',`${scrN} product screens built only from Sera.`],['themes','palette','Themes','Dark and light, five accent presets.']];
-  return `<header class="ph"><h1>Sera</h1><div class="pmeta">React + StyleX · source you own</div></header>
+  return `<header class="ph"><h1 class="ph-logo">${T.logo(84)}</h1><div class="pmeta">React + StyleX · source you own</div></header>
   <p class="lede">A calm, exact design system for product UI. Every component is React + StyleX source you own — copy it in, or start a new app with one script. Dark and light come from the same tokens.</p>
   <div class="row wrap" style="gap:8px;margin-bottom:34px">${H.btn('Get started','primary','','arrow-right','onclick="location.hash=\'installation\'"')}${H.btn('Browse components','','','','onclick="location.hash=\'components\'"')}</div>
   <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr))">${go.map(g=>`<a class="card click" href="#${g[0]}" style="padding:18px"><span class="bmark" style="background:var(--raised-2);color:var(--fg)">${I(g[1],16)}</span><b style="display:block;margin-top:16px;font-weight:600">${g[2]}</b><span class="t-small">${g[3]}</span></a>`).join('')}</div>

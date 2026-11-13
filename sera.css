@@ -1252,3 +1252,7 @@ a,button,[role=button],[role=tab],[role=radio],[role=checkbox],[role=switch],sum
 @media (min-width: 921px){ .ov.at-main{padding-left:calc(264px + 20px);padding-top:calc(var(--top) + 20px)} }
 /* component pages no longer have an Overview / Code tab strip; the Code button on each example opens the source */
 .ph+.lede{margin-top:18px}
+
+/* overview: wordmark as page title */
+.ph h1.ph-logo{display:flex;line-height:0;margin-bottom:14px}
+.ph h1.ph-logo svg{display:block;height:auto;max-width:100%}
