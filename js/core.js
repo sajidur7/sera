@@ -77,6 +77,9 @@ T.logo = (s=28)=>`<svg class="ic" height="${Math.round(s*.66)}" width="${Math.ro
 let seed = 7;
 T.rnd = (s)=>{ if(s!=null) seed=s; seed=(seed*16807)%2147483647; return (seed-1)/2147483646; };
 T.people = [['Maya Okafor','MO',1],['Leo Brandt','LB',2],['Sana Iqbal','SI',6],['Theo Marsh','TM',4],['Ines Duarte','ID',5],['Kai Nakamura','KN',3],['Ruth Adeyemi','RA',1],['Omar Haddad','OH',2]];
+/* keyboard keys are drawn as icons, never as text symbols */
+const KEYI={'⌘':'cmd','⇧':'shift','⌥':'opt','⌃':'ctrl','⏎':'enter','↵':'enter','⌫':'back'};
+T.keys=(str,size=12)=>`<span class="keys">${String(str).replace(/[⌘⇧⌥⌃⏎↵⌫]/g,c=>I(KEYI[c],size))}</span>`;
 const H = T.H = {
   btn:(l,c='',i,ia,attrs='')=>{const s=/\b(sm|xs)\b/.test(c)?14:/\blg\b/.test(c)?18:16;return `<button class="btn ${c}" ${attrs}>${i?I(i,s):''}${l?`<span>${l}</span>`:''}${ia?I(ia,s-2):''}</button>`},
   ib:(i,c='ghost',tip,attrs='')=>`<button class="btn icon ${c}" aria-label="${tip||i}" ${tip?`data-tip="${tip}"`:''} ${attrs}>${I(i,/\b(sm|xs)\b/.test(c)?14:16)}</button>`,
@@ -95,7 +98,7 @@ const H = T.H = {
   input:(ph='',v='',c='',a='')=>`<input class="input ${c}" placeholder="${ph}" value="${v}" ${a}>`,
   ig:(i,ph,v='',end='',c='')=>`<div class="ig ${c}">${i?I(i,16):''}<input placeholder="${ph}" value="${v}">${end}</div>`,
   sel:(v,ph)=>`<button class="select-btn">${v?`<span>${v}</span>`:`<span class="ph">${ph}</span>`}${I('chevs',14)}</button>`,
-  menu:(items)=>items.map(x=>x==='-'?'<div class="msep"></div>':x[0]==='#'?`<div class="mlabel">${x.slice(1)}</div>`:`<button class="mi ${x[3]||''}" role="menuitem">${x[1]?I(x[1],16):''}<span>${x[0]}</span>${x[2]?`<span class="end">${x[2]}</span>`:''}</button>`).join(''),
+  menu:(items)=>items.map(x=>x==='-'?'<div class="msep"></div>':x[0]==='#'?`<div class="mlabel">${x.slice(1)}</div>`:`<button class="mi ${x[3]||''}" role="menuitem">${x[1]?I(x[1],16):''}<span>${x[0]}</span>${x[2]?`<span class="end">${T.keys(x[2])}</span>`:''}</button>`).join(''),
   card:(h,b,f='',c='')=>`<div class="card ${c}">${h?`<div class="card-h">${h}</div>`:''}<div class="card-b">${b}</div>${f?`<div class="card-f">${f}</div>`:''}</div>`,
   sk:(w,h=12,r=8)=>`<span class="sk" style="width:${w};height:${h}px;border-radius:${r}px"></span>`,
   toast:(t,b,i='check-c')=>`<div class="toast">${I(i,18,i==='check-c'?'ok':'')}<div class="grow"><b>${t}</b>${b?`<p>${b}</p>`:''}</div>${H.ib('x','ghost xs','Dismiss','data-close')}</div>`,

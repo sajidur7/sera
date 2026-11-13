@@ -1,7 +1,7 @@
 /**
  * Data & charts — SVG that reads colour tokens, so both themes just work.
  * Stat · StatRow · Delta · Legend · LineChart · BarChart · DonutChart · Sparkline · BarList · BreakdownBar ·
- * Gauge · Heatmap · PillBarChart · ValueChart · UsageMeter · FunnelChart · ScatterChart · BulletChart ·
+ * Gauge · Heatmap · PillBarChart · ValueChart · UsageMeter · FunnelChart · ScatterChart ·
  * ComboChart · RadarChart · StatTiles · StatTile · TargetSegments · MiniBars · DotMatrix · RangeTrack
  */
 import * as stylex from "@stylexjs/stylex";
@@ -334,39 +334,6 @@ export function ScatterChart({ points, width = 600, height = 260 }: { points: { 
   );
 }
 // #endregion
-
-// #region BulletChart
-const bu = stylex.create({
-  row: { display: "grid", gridTemplateColumns: "110px 1fr 56px", gap: 12, alignItems: "center", fontSize: 13 },
-  rows: { display: "flex", flexDirection: "column", gap: 16, width: "100%" },
-  label: { color: color.fg2 },
-  track: { position: "relative", height: 22, borderRadius: 6, overflow: "hidden", backgroundColor: color.sunken, boxShadow: `inset 0 0 0 1px ${color.line}` },
-  band: { position: "absolute", top: 0, bottom: 0, left: 0, backgroundColor: `color-mix(in srgb, ${color.fg} 7%, transparent)` },
-  bar: { position: "absolute", left: 0, top: 7, height: 8, borderRadius: 4 },
-  target: { position: "absolute", top: 3, bottom: 3, width: 2, borderRadius: 2, backgroundColor: color.fg },
-  w: (p: number) => ({ width: `${p}%` }), at: (p: number) => ({ left: `${p}%` }), c: (c: string) => ({ backgroundColor: c }),
-  v: { textAlign: "right", fontWeight: 600, fontVariantNumeric: "tabular-nums", color: color.fg },
-});
-/** Progress toward a target over poor / fair bands (percent values). */
-export function BulletChart({ rows }: { rows: { label: string; value: number; target: number; bands?: [number, number] }[] }) {
-  return (
-    <div {...stylex.props(bu.rows)}>
-      {rows.map((r) => (
-        <div key={r.label} {...stylex.props(bu.row)}>
-          <span {...stylex.props(bu.label)}>{r.label}</span>
-          <div {...stylex.props(bu.track)}>
-            {(r.bands ?? [50, 75]).map((b) => <span key={b} {...stylex.props(bu.band, bu.w(b))} />)}
-            <span {...stylex.props(bu.bar, bu.w(r.value), bu.c(r.value >= r.target ? color.ok : color.accent))} />
-            <span {...stylex.props(bu.target, bu.at(r.target))} />
-          </div>
-          <span {...stylex.props(bu.v)}>{r.value}%</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-// #endregion
-
 // #region ComboChart
 export function ComboChart({ bars, line, labels, unit = "", width = 640, height = 240 }: { bars: number[]; line: number[]; labels?: string[]; unit?: string; width?: number; height?: number }) {
   const pl = 36, pr = 36, pt = 12, pb = 26, n = bars.length, bm = nice(Math.max(...bars) * 1.1), lm = nice(Math.max(...line) * 1.1), slot = (width - pl - pr) / n, bw = slot * 0.5;

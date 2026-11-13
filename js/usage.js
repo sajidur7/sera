@@ -622,10 +622,6 @@ u('funnel-chart','FunnelChart','FunnelChart',`<FunnelChart steps={[
   { label: "Leads", value: 4200 }, { label: "Qualified", value: 1680 }, { label: "Won", value: 112 },
 ]} />`);
 u('scatter-chart','ScatterChart','ScatterChart',`<ScatterChart points={deals.map((d) => ({ x: d.speed, y: d.size, size: d.seats / 20, color: "c1" }))} />`);
-u('bullet-chart','BulletChart','BulletChart',`<BulletChart rows={[
-  { label: "Maya Okafor", value: 92, target: 80 },
-  { label: "Leo Brandt", value: 71, target: 80 },
-]} />`);
 u('combo-chart','ComboChart','ComboChart',`<ComboChart bars={dealsClosed} line={winRate} labels={months} unit="%" />`);
 u('radar-chart','RadarChart','RadarChart',`<RadarChart
   axes={["Prospecting", "Discovery", "Demo", "Negotiation", "Closing", "Follow-up"]}

@@ -47,7 +47,7 @@ T.reg('Get started',[
   ['Rows are level','Cards in a row stretch to the same height; push footers down with margin-top:auto.'],
   ['Compose, don’t restyle','Use component props first (variant, size, tone). Add one-off styles through the xstyle prop with stylex.create — never inline hex.'],
   ['Import from the barrel','import { Button } from "./sera" — the files are owned by the app, so edit them in place instead of wrapping.'],
-  ['Keys as icons','⌘ ⇧ ⌥ ⏎ ⌫ are drawn as icons inside .kbd, never typed as words.']];
+  ['Keys as icons','Command, Shift, Option, Enter and Delete are drawn as icons, never typed as symbols or words.']];
   return head('Get started','AI agents','Rules an agent should follow when it builds with Sera. Paste them into your agent instructions.')+
   `<div class="list">${rules.map((r,i)=>`<div class="li"><span class="demo-n" style="width:22px">${String(i+1).padStart(2,'0')}</span><div class="grow"><b>${r[0]}</b><small style="white-space:normal">${r[1]}</small></div></div>`).join('')}</div>`+
   `<div style="margin-top:22px">${cb('AGENTS.md','# Sera rules\n'+rules.map((r,i)=>`${i+1}. ${r[0]} — ${r[1]}`).join('\n'))}</div>`;

@@ -53,7 +53,7 @@ T.reg('Action',[
  ],p:'.toolbar|class|—|Raised container;.vr|class|—|Vertical separator'},
 {s:'dropdown-menu',n:'Dropdown Menu',c:'.anchor  .pop  .mi',d:'A list of actions that opens from a trigger. Items show icons, shortcuts and a danger tone.',
  demos:[
-  {t:'Open',c:'tall',h:pop([['#Deal'],...menuItems])},
+  {t:'Open',c:'tall',h:pop(['#Deal',...menuItems])},
   {t:'Trigger',d:'Click the button; click outside or press Esc to close.',c:'tall',h:anchorMenu(H.btn('Actions','','','chev-down','data-pop'),menuItems)},
   {t:'Checkable',c:'tall',h:`<div class="pop" role="menu"><div class="mlabel">Columns</div>${['Owner','Stage','Value','Close date','Source'].map((x,k)=>`<button class="mi" role="menuitemcheckbox" aria-checked="${k<3}"><span>${x}</span><span class="end">${I('check',14,'chk')}</span></button>`).join('')}</div>`},
  ],p:'.anchor|class|—|Positions the menu;[data-pop]|attribute|—|Toggles the sibling .pop;.pop.right · .up|modifier|—|Alignment;.mi.danger|modifier|—|Destructive item;role=menuitemcheckbox|attribute|—|Checkable item'},
@@ -110,7 +110,7 @@ T.reg('Chat',[
 {s:'chat-composer',n:'Chat Composer',c:'.promptbar  .promptpill',d:'A box that grows with what you type. The mic turns into a send arrow once there is text.',
  demos:[{t:'Box',c:'stretch',d:'Type to see the send button change.',h:composer()},
   {t:'Pill that opens',d:'Click the pill.',c:'col-flow',h:`<div class="promptpill" data-expand>${I('bot',16)}<span class="grow">Ask Ledger…</span>${H.kbd(I('cmd',11),'K')}</div><div class="promptbar" hidden><textarea rows="2" placeholder="What do you want to know?"></textarea><div class="pb-row">${H.ib('clip','ghost sm','Attach')}<span class="grow"></span>${H.btn('Close','ghost sm','','','data-collapse')}<button class="btn icon ghost sm send" aria-label="Send">${I('mic',16)}</button></div></div>`},
-  {t:'With context',c:'stretch',h:`<div class="promptbar" style="max-width:none"><div class="row wrap" style="padding:4px 4px 0;gap:6px"><span class="filechip">${I('building',14)}Halden Freight <button class="btn icon ghost xs" aria-label="Remove" style="width:18px;height:18px">${I('x',10)}</button></span><span class="filechip">${I('file',14)}call-notes.md</span></div><textarea rows="1" placeholder="Ask about this account…"></textarea><div class="pb-row">${H.ib('plus','ghost sm','Attach')}<span class="hint">Shift ⏎ for a new line</span><span class="grow"></span><button class="btn icon ghost sm send" aria-label="Send">${I('mic',16)}</button></div></div>`}],
+  {t:'With context',c:'stretch',h:`<div class="promptbar" style="max-width:none"><div class="row wrap" style="padding:4px 4px 0;gap:6px"><span class="filechip">${I('building',14)}Halden Freight <button class="btn icon ghost xs" aria-label="Remove" style="width:18px;height:18px">${I('x',10)}</button></span><span class="filechip">${I('file',14)}call-notes.md</span></div><textarea rows="1" placeholder="Ask about this account…"></textarea><div class="pb-row">${H.ib('plus','ghost sm','Attach')}<span class="hint">${T.keys('⇧⏎')} for a new line</span><span class="grow"></span><button class="btn icon ghost sm send" aria-label="Send">${I('mic',16)}</button></div></div>`}],
  p:'.promptbar|class|—|Growing box;.promptpill|class|—|Collapsed pill;data-expand · data-collapse|attribute|—|Switch between them;.send|class|—|Mic → arrow when there is text'},
 ],'c');
 
